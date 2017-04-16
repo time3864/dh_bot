@@ -901,7 +901,7 @@ Func Open_DH()
 	;need to check if Blue stack maximized ;;todo
 
 	;go to "Android tab"
-	Mouse_Click_Portable(386, 30)
+	Mouse_Click_Portable(320, 30)
 	Sleep(5000)
 	;click back to main page
 	Mouse_Click_Portable(34, 31)
