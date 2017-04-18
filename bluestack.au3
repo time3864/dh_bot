@@ -7,7 +7,6 @@
 
 Global $current_mission
 Global $status = 0
-Global $master = 1
 Global $player_count = 1
 
 Global $players_file = "players.txt"
@@ -25,6 +24,9 @@ Global $dh_y[2]
 
 Global $dh_x_scale
 Global $dh_y_scale
+
+;blue stack main configuration
+Global $bluestack_setting = 0
 
 ;configuration file
 Global $player ; login id
@@ -151,6 +153,11 @@ Func Main_Controller()
 					Error_Log("Player mission completed!")
 				Else
 					Error_Log("Player mission failed!")
+				EndIf
+				Player_Control($player, $player_active)
+				If $player_active == 0 Then
+					$i = 8
+					Error_Log("Player config abort mission!")
 				EndIf
 			Next ; For $i = 1 To 8
 		EndIf ; If $$player_active <> 0 Then
@@ -554,16 +561,16 @@ Func Reset_DH_Scale()
 	$dh_y_base[1] = 0
 EndFunc
 
-Func Master_Command()
+Func Master_Settings()
 
 	Local $hFileOpen = FileOpen("settings.txt", $FO_READ)
 	If $hFileOpen == -1 Then
 		Error_Log("Settings failed!")
 	Else
-		;Error_Log("Settings OK!")
+		Error_Log("Settings OK!")
 		Local $sFileRead = FileReadLine($hFileOpen, 1)
-		;MsgBox($MB_SYSTEMMODAL, "", "File read: " & $sFileRead)
-		$master = $sFileRead
+		$bluestack_setting = $sFileRead
+		;MsgBox($MB_SYSTEMMODAL, "", "File read: " & $bluestack_setting)
 		FileClose($hFileOpen)
 	EndIf
 
@@ -892,14 +899,32 @@ Func DH_Scale_Calculate()
 	Error_Log($dh_x_scale & ":" & $dh_y_scale)
 EndFunc
 
+Func Maximize_Bluestack($handler)
+	Local $aPos = WinGetPos($handler)
+	Local $xpos = $aPos[0]
+	Local $ypos = $aPos[1]
+	Local $width = $aPos[2]
+	Local $height = $aPos[3]
+	If $xpos <> 0 and $ypos <> 0 Then
+		Mouse_Click_Portable($xpos + $width - 100, $ypos + 20)
+	EndIf
+EndFunc
+
 Func Open_DH()
 	Reset_DH_Scale()
 	;Open Blue Stack
+	;Run("C:\ProgramData\BlueStacksGameManager\BlueStacks.exe")
+	;Global $hWnd_bluestack = WinWait("[CLASS:BlueStacksApp]", "", 10)
+	;WinActivate($hWnd_bluestack)
 	Run("C:\ProgramData\BlueStacksGameManager\BlueStacks.exe")
-	Global $hWnd_bluestack = WinWait("[CLASS:BlueStacksApp]", "", 10)
+	Global $hWnd_bluestack = WinGetHandle("[TITLE:Bluestacks App Player]")
+	Sleep(10000)
 	WinActivate($hWnd_bluestack)
+	WinWaitActive($hWnd_bluestack, "", 30)
 	;need to check if Blue stack maximized ;;todo
-
+	If $bluestack_setting <> 0 Then
+		Maximize_Bluestack($hWnd_bluestack)
+	EndIf
 	;go to "Android tab"
 	Mouse_Click_Portable(320, 30)
 	Sleep(5000)
@@ -2619,8 +2644,6 @@ EndFunc   ;==>Collect_Daily_Pack
 
 
 Func Collect_Token()
-	;collect token at 12pm and 6pm
-	;If @HOUR == 12 Or @HOUR == 18 Then
 	;click event
 	Mouse_Click_Portable(1211, 541)
 	Sleep(2000)
@@ -2671,7 +2694,6 @@ Func Collect_Token()
 	Next
 
 	BACK_TO_MAIN_SCREEN()
-	;EndIf ;If @HOUR == 12 Or @HOUR == 18 Then
 EndFunc   ;==>Collect_Token
 
 
