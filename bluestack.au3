@@ -38,7 +38,7 @@ Global $player_mission_skip ; skip mission in format: 1,3,10
 Global $player_hour_skip ; do not login player in these hours
 
 ;clan war settings
-Global $clan_war_city = 1
+Global $clan_war_city = 0
 
 ;scan for image change
 Global $screen_check[20]
@@ -95,6 +95,7 @@ EndIf
 Func Main_Controller()
 
 	PC_Check()
+	Master_Settings()
 
 	Local $current_mission_temp = 0
 
@@ -466,6 +467,9 @@ Func All_Missions()
 		Case 600
 			$current_mission = 600
 			Clan_War_Internal()
+		Case 650
+			$current_mission = 650
+			Clan_War_Internal_Random()
 		case 700
 			$current_mission = 700
 			Mining_Scan()
@@ -901,12 +905,16 @@ EndFunc
 
 Func Maximize_Bluestack($handler)
 	Local $aPos = WinGetPos($handler)
-	Local $xpos = $aPos[0]
-	Local $ypos = $aPos[1]
-	Local $width = $aPos[2]
-	Local $height = $aPos[3]
-	If $xpos <> 0 and $ypos <> 0 Then
-		Mouse_Click_Portable($xpos + $width - 100, $ypos + 20)
+
+	If IsArray($aPos) Then
+		Local $xpos = $aPos[0]
+		Local $ypos = $aPos[1]
+		Local $width = $aPos[2]
+		Local $height = $aPos[3]
+		If $xpos <> 0 and $ypos <> 0 Then
+			Mouse_Click_Portable($xpos + $width - 100, $ypos + 20)
+			Sleep(5000)
+		EndIf
 	EndIf
 EndFunc
 
@@ -917,6 +925,7 @@ Func Open_DH()
 	;Global $hWnd_bluestack = WinWait("[CLASS:BlueStacksApp]", "", 10)
 	;WinActivate($hWnd_bluestack)
 	Run("C:\ProgramData\BlueStacksGameManager\BlueStacks.exe")
+	Sleep(10000)
 	Global $hWnd_bluestack = WinGetHandle("[TITLE:Bluestacks App Player]")
 	Sleep(10000)
 	WinActivate($hWnd_bluestack)
@@ -3113,6 +3122,37 @@ Func Clan_War_Internal()
 EndFunc   ;==>Clan_War_Internal
 
 
+Func Clan_War_Internal_Random()
+	;;alliance
+	Mouse_Click_Portable(1005, 1013)
+	Sleep(1000)
+	Mouse_Click_Portable(1146, 315)
+	Sleep(1000)
+	;drag one page down
+	Mouse_Drag_Portable(938, 721, 938, 309)
+	Sleep(1000)
+	;;war page
+	Mouse_Click_Portable(972, 837)
+	Sleep(3000)
+
+	If Clan_War_Internal_Map() == 1 Then
+		$clan_war_city = 1
+		While(1)
+			Clan_War_City_Enter()
+			Sleep(5000)
+			For $i = 1 To 30
+				Clan_War_Attack_Tower()
+			Next
+			Clan_War_Exit_City()
+			$clan_war_city = $clan_war_city + 1
+			If $clan_war_city == 11 Then $clan_war_city = 1
+		WEnd
+	Else
+		$status = 1
+		Return
+	EndIf
+EndFunc
+
 
 
 Func Clan_War_City_Enter()
@@ -3121,7 +3161,9 @@ Func Clan_War_City_Enter()
 	Local $drag_first = 0
 	Local $drag_last = 0
 
-	Clan_War_City_Read()
+	If $clan_war_city == 0 Then
+		Clan_War_City_Read()
+	EndIf
 
 	Switch $clan_war_city
 		Case 1 ;changan
@@ -3144,15 +3186,21 @@ Func Clan_War_City_Enter()
 			$y_war = 484
 			$drag_first = 730
 			$drag_last = 1200
+		Case Else ;default go jianye
+			$x_war = 986
+			$y_war = 509
+			$drag_first = 1200
+			$drag_last = 730
 	EndSwitch
 
-	For $i = 1 To 4
+	For $i = 1 To 3
 		Mouse_Drag_Portable($drag_first, 359, $drag_last, 359)
 		Sleep(500)
 	Next
-	;enter city
+	;click city
 	Mouse_Click_Portable($x_war, $y_war)
 	Sleep(1000)
+	;enter city
 	Mouse_Click_Portable(961, 800)
 	Sleep(1000)
 
