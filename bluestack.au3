@@ -27,6 +27,7 @@ Global $dh_y_scale
 
 ;blue stack main configuration
 Global $bluestack_setting = 0
+Global $shutdown = 0
 
 ;configuration file
 Global $player ; login id
@@ -168,7 +169,14 @@ Func Main_Controller()
 	WEnd ;While ($player) And ($password) And ($server)
 
 	Error_Log("No more player!")
-	;Shutdown ($SD_REBOOT)
+
+	If $shutdown == 1 Then
+		;shutdown after 20 minutes
+		For $i = 1 to 20
+			Sleep(60000)
+		Next
+		Shutdown($SD_SHUTDOWN)
+	EndIf
 
 EndFunc   ;==>Main_Controller
 
@@ -3253,7 +3261,7 @@ EndFunc   ;==>Clan_War_Exit_City
 
 
 Func Clan_War_Internal_Map()
-	For $i = 1 To 4
+	For $i = 1 To 3
 		Mouse_Drag_Portable(800, 359, 1200, 359)
 		Sleep(500)
 	Next
