@@ -143,6 +143,7 @@ Func Main_Controller()
 			For $i = 1 To 8
 				$status = 0
 				Open_DH()
+				LOGIN()
 				If $status == 0 Then
 					All_Missions()
 				EndIf
@@ -986,7 +987,9 @@ Func Open_DH()
 	If IsArray($FA) And IsArray($FB) And IsArray($FC) Then
 		Error_Log("DH opened!")
 	EndIf
+EndFunc
 
+Func LOGIN()
 	LOGIN_PLAYER()
 	Sleep(15000)
 
@@ -1009,7 +1012,6 @@ Func Open_DH()
 		;STOP_SCRIPT()
 	EndIf
 	Sleep(10000)
-
 EndFunc   ;==>Open_DH
 
 Func Open_DH_Express()
@@ -2239,9 +2241,10 @@ Func Onslaught_Mission()
 	;onslaught mode
 	Mouse_Click_Portable(984, 511)
 	Sleep(1000)
-
+	Save_Screen()
 	;3 star sweep
 	For $i = 1 To 20
+		If Check_Screen() > 10 Then
 		;3 stars sweep
 		Mouse_Click_Portable(1148, 721)
 		Sleep(1000)
@@ -2302,8 +2305,10 @@ Func Onslaught_Mission()
 		Else
 			;MsgBox($MB_SYSTEMMODAL, "Found!", "no gate!")
 		EndIf
+		EndIf
 	Next
 
+	BACK_TO_MAIN_SCREEN()
 EndFunc   ;==>Onslaught_Mission
 
 Func Enemy_Gates()
