@@ -6,7 +6,7 @@ Reset_DH_Scale()
 ;Sleep(2000)
 ;Mining_Collection()
 
-Rob_End()
+Mystic_Legend_General()
 
 
 ;MsgBox($MB_SYSTEMMODAL, "Check 05:", "Admire. \nNote: Only support English version")

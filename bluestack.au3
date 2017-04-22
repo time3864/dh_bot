@@ -1790,6 +1790,10 @@ Func Mystic_Legend_General()
 	;click luxun
 	Mouse_Click_Portable(762, 919)
 	Sleep(1500)
+
+	$FA = Pixel_Search_Portable(1175,763,2,0xDE240F)
+	$FB = Pixel_Search_Portable(1161,741,2,0xF3300B)
+	If IsArray($FA) And IsArray($FB) Then
 	;click mystic
 	Mouse_Click_Portable(1161, 768)
 	Sleep(2000)
@@ -1802,7 +1806,7 @@ Func Mystic_Legend_General()
 
 	Battle_Start()
 	Mystic_Battle_End()
-
+	EndIf
 	BACK_TO_MAIN_SCREEN()
 EndFunc
 
