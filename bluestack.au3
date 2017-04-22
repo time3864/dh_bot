@@ -1133,7 +1133,7 @@ Func Battle_End()
 EndFunc   ;==>Battle_End
 
 
-Func Rob_End()
+Func Rob_End_old()
 	;if token finish
 	$FA = Pixel_Search_Portable_XY(833,708,35,21,0x01BA31)
 	$FB = Pixel_Search_Portable_XY(1082,711,35,21,0x00B12D)
@@ -1158,6 +1158,39 @@ Func Rob_End()
 		$FB = Pixel_Search_Portable(942,915,4,0XC40F0F)
 		$FC = Pixel_Search_Portable(985,912,4,0X9C0E06)
 		If IsArray($FA) And IsArray($FB) And IsArray($FC) Then
+			$i = 1
+		Else
+			Sleep(1000)
+		EndIf
+		$timeout = $timeout - 1
+		If $timeout > 0 Then
+		Else
+			$i = 1 ; discontinued if timeout
+		EndIf
+	Until $i = 1
+	Mouse_Click_Portable(957, 927)
+	Sleep(1000)
+
+EndFunc   ;==>Rob_End
+
+Func Rob_End()
+	;if token finish
+	$FA = Pixel_Search_Portable_XY(833,708,35,21,0x01BA31)
+	$FB = Pixel_Search_Portable_XY(1082,711,35,21,0x00B12D)
+	If IsArray($FA) And IsArray($FB) Then
+		Mouse_Click_Portable(1181, 426)
+		Sleep(1000)
+		Return
+	EndIf
+	Local $timeout = 90
+	;wait until battle finish
+	Local $i = 0
+	Do
+		$FA = Pixel_Search_Portable(685,611,4,0xB92312)
+		$FB = Pixel_Search_Portable(1225,591,4,0x92160E)
+		$FC = Pixel_Search_Portable(783,743,4,0xBB9764)
+		$FD = Pixel_Search_Portable(986,839,4,0xC2B299)
+		If IsArray($FA) And IsArray($FB) And IsArray($FC) And IsArray($FD) Then
 			$i = 1
 		Else
 			Sleep(1000)

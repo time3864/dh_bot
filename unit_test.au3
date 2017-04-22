@@ -6,10 +6,10 @@ Reset_DH_Scale()
 ;Sleep(2000)
 ;Mining_Collection()
 
-Legend_General()
+Rob_End()
 
 
-MsgBox($MB_SYSTEMMODAL, "Check 05:", "Admire. \nNote: Only support English version")
+;MsgBox($MB_SYSTEMMODAL, "Check 05:", "Admire. \nNote: Only support English version")
 
 
 ;Onslaught_Mission()
