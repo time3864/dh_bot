@@ -1146,17 +1146,17 @@ Func Rob_End()
 	;wait until battle finish
 	Local $i = 0
 	Do
-		$FA = Pixel_Search_Portable(938,905,2,0x10BA1E)
-		$FB = Pixel_Search_Portable(958,952,2,0X19BB10)
-		$FC = Pixel_Search_Portable(988,912,2,0X0A9F0F)
+		$FA = Pixel_Search_Portable(938,905,4,0x10BA1E)
+		$FB = Pixel_Search_Portable(958,952,4,0X19BB10)
+		$FC = Pixel_Search_Portable(988,912,4,0X0A9F0F)
 		If IsArray($FA) And IsArray($FB) And IsArray($FC) Then
 			$i = 1
 		Else
 			Sleep(1000)
 		EndIf
-		$FA = Pixel_Search_Portable(941,911,2,0xB40B0B)
-		$FB = Pixel_Search_Portable(942,915,2,0XC40F0F)
-		$FC = Pixel_Search_Portable(985,912,2,0X9C0E06)
+		$FA = Pixel_Search_Portable(941,911,4,0xB40B0B)
+		$FB = Pixel_Search_Portable(942,915,4,0XC40F0F)
+		$FC = Pixel_Search_Portable(985,912,4,0X9C0E06)
 		If IsArray($FA) And IsArray($FB) And IsArray($FC) Then
 			$i = 1
 		Else
