@@ -7,7 +7,6 @@
 
 Global $current_mission
 Global $status = 0
-Global $master = 1
 Global $player_count = 1
 
 Global $players_file = "players.txt"
@@ -26,6 +25,10 @@ Global $dh_y[2]
 Global $dh_x_scale
 Global $dh_y_scale
 
+;blue stack main configuration
+Global $bluestack_setting = 0
+Global $shutdown = 0
+
 ;configuration file
 Global $player ; login id
 Global $password ; password
@@ -36,7 +39,7 @@ Global $player_mission_skip ; skip mission in format: 1,3,10
 Global $player_hour_skip ; do not login player in these hours
 
 ;clan war settings
-Global $clan_war_city = 1
+Global $clan_war_city = 0
 
 ;scan for image change
 Global $screen_check[20]
@@ -93,6 +96,7 @@ EndIf
 Func Main_Controller()
 
 	PC_Check()
+	Master_Settings()
 
 	Local $current_mission_temp = 0
 
@@ -139,6 +143,7 @@ Func Main_Controller()
 			For $i = 1 To 8
 				$status = 0
 				Open_DH()
+				LOGIN()
 				If $status == 0 Then
 					All_Missions()
 				EndIf
@@ -152,6 +157,11 @@ Func Main_Controller()
 				Else
 					Error_Log("Player mission failed!")
 				EndIf
+				Player_Control($player, $player_active)
+				If $player_active == 0 Then
+					$i = 8
+					Error_Log("Player config abort mission!")
+				EndIf
 			Next ; For $i = 1 To 8
 		EndIf ; If $$player_active <> 0 Then
 		;read next player
@@ -160,7 +170,14 @@ Func Main_Controller()
 	WEnd ;While ($player) And ($password) And ($server)
 
 	Error_Log("No more player!")
-	;Shutdown ($SD_REBOOT)
+
+	If $shutdown == 1 Then
+		;shutdown after 20 minutes
+		For $i = 1 to 20
+			Sleep(60000)
+		Next
+		Shutdown($SD_SHUTDOWN)
+	EndIf
 
 EndFunc   ;==>Main_Controller
 
@@ -459,6 +476,9 @@ Func All_Missions()
 		Case 600
 			$current_mission = 600
 			Clan_War_Internal()
+		Case 650
+			$current_mission = 650
+			Clan_War_Internal_Random()
 		case 700
 			$current_mission = 700
 			Mining_Scan()
@@ -554,16 +574,16 @@ Func Reset_DH_Scale()
 	$dh_y_base[1] = 0
 EndFunc
 
-Func Master_Command()
+Func Master_Settings()
 
 	Local $hFileOpen = FileOpen("settings.txt", $FO_READ)
 	If $hFileOpen == -1 Then
 		Error_Log("Settings failed!")
 	Else
-		;Error_Log("Settings OK!")
+		Error_Log("Settings OK!")
 		Local $sFileRead = FileReadLine($hFileOpen, 1)
-		;MsgBox($MB_SYSTEMMODAL, "", "File read: " & $sFileRead)
-		$master = $sFileRead
+		$bluestack_setting = $sFileRead
+		;MsgBox($MB_SYSTEMMODAL, "", "File read: " & $bluestack_setting)
 		FileClose($hFileOpen)
 	EndIf
 
@@ -892,17 +912,43 @@ Func DH_Scale_Calculate()
 	Error_Log($dh_x_scale & ":" & $dh_y_scale)
 EndFunc
 
+Func Maximize_Bluestack($handler)
+	Local $aPos = WinGetPos($handler)
+
+	If IsArray($aPos) Then
+		Local $xpos = $aPos[0]
+		Local $ypos = $aPos[1]
+		Local $width = $aPos[2]
+		Local $height = $aPos[3]
+		If $xpos <> 0 and $ypos <> 0 Then
+			Mouse_Click_Portable($xpos + $width - 100, $ypos + 20)
+			Error_Log("Maximize needed!")
+			Sleep(5000)
+		EndIf
+	Else
+		Error_Log("WinGetPos failed!")
+	EndIf
+EndFunc
+
 Func Open_DH()
 	Reset_DH_Scale()
 	;Open Blue Stack
+	;Run("C:\ProgramData\BlueStacksGameManager\BlueStacks.exe")
+	;Global $hWnd_bluestack = WinWait("[CLASS:BlueStacksApp]", "", 10)
+	;WinActivate($hWnd_bluestack)
 	Run("C:\ProgramData\BlueStacksGameManager\BlueStacks.exe")
-	Global $hWnd_bluestack = WinWait("[CLASS:BlueStacksApp]", "", 10)
+	Sleep(10000)
+	Global $hWnd_bluestack = WinGetHandle("[TITLE:Bluestacks App Player]")
+	Sleep(5000)
 	WinActivate($hWnd_bluestack)
+	WinWaitActive($hWnd_bluestack, "", 30)
 	;need to check if Blue stack maximized ;;todo
-
+	If $bluestack_setting <> 0 Then
+		Maximize_Bluestack($hWnd_bluestack)
+	EndIf
 	;go to "Android tab"
 	Mouse_Click_Portable(320, 30)
-	Sleep(5000)
+	Sleep(20000)
 	;click back to main page
 	Mouse_Click_Portable(34, 31)
 	Sleep(5000)
@@ -944,7 +990,9 @@ Func Open_DH()
 	If IsArray($FA) And IsArray($FB) And IsArray($FC) Then
 		Error_Log("DH opened!")
 	EndIf
+EndFunc
 
+Func LOGIN()
 	LOGIN_PLAYER()
 	Sleep(15000)
 
@@ -967,7 +1015,6 @@ Func Open_DH()
 		;STOP_SCRIPT()
 	EndIf
 	Sleep(10000)
-
 EndFunc   ;==>Open_DH
 
 Func Open_DH_Express()
@@ -1660,6 +1707,7 @@ Func Legend_General()
 	;click legends page
 	Mouse_Click_Portable(950, 390)
 	Sleep(1000)
+	If Legend_General_Page() == 1 Then
 	;click zhang jiao
 	Mouse_Click_Portable(1155, 919)
 	Sleep(1000)
@@ -1667,16 +1715,24 @@ Func Legend_General()
 	Mouse_Click_Portable(943, 549)
 	Sleep(1000)
 	For $i = 1 To 5
+		Save_Screen()
 		;click Cao Cao
 		Mouse_Click_Portable(987, 344)
 		Sleep(1000)
 		;click battle
 		Mouse_Click_Portable(957, 866)
 		Sleep(1000)
-		Battle_Start()
-		Battle_End()
+		;click start
+		Mouse_Click_Portable(964, 1036)
+		Sleep(2000)
+		If Check_Screen() < 10 Then
+			Battle_Start()
+			Battle_End()
+		Else
+			$i = 5
+		EndIf
 	Next
-
+	EndIf
 	BACK_TO_MAIN_SCREEN()
 EndFunc   ;==>Legend_General
 
@@ -1717,6 +1773,19 @@ Func Mystic_Legend_General()
 	BACK_TO_MAIN_SCREEN()
 EndFunc
 
+
+Func Legend_General_Page()
+
+	$FA = Pixel_Search_Portable(968,852,2,0x65542B)
+	$FB = Pixel_Search_Portable(993,667,2,0xBA0000)
+	$FC = Pixel_Search_Portable(700,696,2,0x5C4C2B)
+	$FD = Pixel_Search_Portable(1201,376,2,0x221A11)
+	If IsArray($FA) And IsArray($FB) And IsArray($FC) And IsArray($FD) Then
+		Return 1
+	Else
+		Return 0
+	EndIf
+EndFunc
 
 Func Free_Spin_Altar()
 
@@ -2197,9 +2266,10 @@ Func Onslaught_Mission()
 	;onslaught mode
 	Mouse_Click_Portable(984, 511)
 	Sleep(1000)
-
+	Save_Screen()
 	;3 star sweep
 	For $i = 1 To 20
+		If Check_Screen() > 10 Then
 		;3 stars sweep
 		Mouse_Click_Portable(1148, 721)
 		Sleep(1000)
@@ -2260,8 +2330,10 @@ Func Onslaught_Mission()
 		Else
 			;MsgBox($MB_SYSTEMMODAL, "Found!", "no gate!")
 		EndIf
+		EndIf
 	Next
 
+	BACK_TO_MAIN_SCREEN()
 EndFunc   ;==>Onslaught_Mission
 
 Func Enemy_Gates()
@@ -2619,8 +2691,6 @@ EndFunc   ;==>Collect_Daily_Pack
 
 
 Func Collect_Token()
-	;collect token at 12pm and 6pm
-	;If @HOUR == 12 Or @HOUR == 18 Then
 	;click event
 	Mouse_Click_Portable(1211, 541)
 	Sleep(2000)
@@ -2671,7 +2741,6 @@ Func Collect_Token()
 	Next
 
 	BACK_TO_MAIN_SCREEN()
-	;EndIf ;If @HOUR == 12 Or @HOUR == 18 Then
 EndFunc   ;==>Collect_Token
 
 
@@ -3091,6 +3160,37 @@ Func Clan_War_Internal()
 EndFunc   ;==>Clan_War_Internal
 
 
+Func Clan_War_Internal_Random()
+	;;alliance
+	Mouse_Click_Portable(1005, 1013)
+	Sleep(1000)
+	Mouse_Click_Portable(1146, 315)
+	Sleep(1000)
+	;drag one page down
+	Mouse_Drag_Portable(938, 721, 938, 309)
+	Sleep(1000)
+	;;war page
+	Mouse_Click_Portable(972, 837)
+	Sleep(3000)
+
+	If Clan_War_Internal_Map() == 1 Then
+		$clan_war_city = 1
+		While(1)
+			Clan_War_City_Enter()
+			Sleep(5000)
+			For $i = 1 To 30
+				Clan_War_Attack_Tower()
+			Next
+			Clan_War_Exit_City()
+			$clan_war_city = $clan_war_city + 1
+			If $clan_war_city == 11 Then $clan_war_city = 1
+		WEnd
+	Else
+		$status = 1
+		Return
+	EndIf
+EndFunc
+
 
 
 Func Clan_War_City_Enter()
@@ -3099,7 +3199,9 @@ Func Clan_War_City_Enter()
 	Local $drag_first = 0
 	Local $drag_last = 0
 
-	Clan_War_City_Read()
+	If $clan_war_city == 0 Then
+		Clan_War_City_Read()
+	EndIf
 
 	Switch $clan_war_city
 		Case 1 ;changan
@@ -3122,15 +3224,21 @@ Func Clan_War_City_Enter()
 			$y_war = 484
 			$drag_first = 730
 			$drag_last = 1200
+		Case Else ;default go jianye
+			$x_war = 986
+			$y_war = 509
+			$drag_first = 1200
+			$drag_last = 730
 	EndSwitch
 
-	For $i = 1 To 4
+	For $i = 1 To 3
 		Mouse_Drag_Portable($drag_first, 359, $drag_last, 359)
 		Sleep(500)
 	Next
-	;enter city
+	;click city
 	Mouse_Click_Portable($x_war, $y_war)
 	Sleep(1000)
+	;enter city
 	Mouse_Click_Portable(961, 800)
 	Sleep(1000)
 
@@ -3183,7 +3291,7 @@ EndFunc   ;==>Clan_War_Exit_City
 
 
 Func Clan_War_Internal_Map()
-	For $i = 1 To 4
+	For $i = 1 To 3
 		Mouse_Drag_Portable(800, 359, 1200, 359)
 		Sleep(500)
 	Next
