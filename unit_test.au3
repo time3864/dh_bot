@@ -2,17 +2,20 @@
 
 Reset_DH_Scale()
 
+;Daily_Greeting()
+
+Alliance_Donation()
+
 ;Occupy(779,248)
 ;Sleep(2000)
 ;Mining_Collection()
 
-Mystic_Legend_General()
+;Teamviewer_Auto_Close()
 
+	If FileExists (@ScriptDir & "\bluestack.au3") Then
+		FileCopy(@ScriptDir & "\bluestack.au3", @ScriptDir & "\bluestack.txt", $FC_OVERWRITE )
+	EndIf
 
-;MsgBox($MB_SYSTEMMODAL, "Check 05:", "Admire. \nNote: Only support English version")
-
-
-;Onslaught_Mission()
 
 Func Check_Mine_01()
 	$FA = Pixel_Search_Portable(972,350,1,0x262625)

@@ -2,9 +2,9 @@
 
 Error_Log("----------------------------------------------------------------------")
 
-$players_file = "players_single.txt"
+$players_file = "players_group.txt"
 
-$master_mission = 0
+$master_mission = 900
 Main_Controller()
 
 Exit

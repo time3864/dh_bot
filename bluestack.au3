@@ -25,9 +25,17 @@ Global $dh_y[2]
 Global $dh_x_scale
 Global $dh_y_scale
 
-;blue stack main configuration
+;bluestack patch
+Global $bluestack_patch
+
+;bluestack main configuration
 Global $bluestack_setting = 0
+Global $dh_location = 3
 Global $shutdown = 0
+
+;android program information
+Global $dh_open[2]
+Global $dh_close[2]
 
 ;configuration file
 Global $player ; login id
@@ -94,9 +102,12 @@ EndIf
 
 
 Func Main_Controller()
-
+	;PC
 	PC_Check()
+	;android
 	Master_Settings()
+	;game
+	DH_Info()
 
 	Local $current_mission_temp = 0
 
@@ -482,6 +493,9 @@ Func All_Missions()
 		case 700
 			$current_mission = 700
 			Mining_Scan()
+		Case 900
+			$current_mission = 900
+			Alliance_Donation()
 		case 1000
 			$current_mission = 1000
 			Dungeon_Bot()
@@ -538,6 +552,49 @@ Func Error_Log($log)
 	FileClose($hFile) ; Close the filehandle to release the file.
 EndFunc   ;==>Error_Log
 
+Func Configure_BlueStack()
+	MsgBox($MB_SYSTEMMODAL, "Configuration", "We have to configure where to open DH apps and close DH.")
+	Sleep(1000)
+
+	Local $aPos
+	MsgBox($MB_SYSTEMMODAL, "Where is DH?", "Mouse your mouse to where you open DH apps after this. Note: In All Apps area, not in front page.")
+	Sleep(5000)
+	$aPos = MouseGetPos()
+	If IsArray($aPos) Then
+		$dh_open[0] = $aPos[0]
+		$dh_open[1] = $aPos[1]
+	EndIf
+	Mouse_Click_Portable($dh_open[0],$dh_open[1])
+	Sleep(2000)
+
+	MsgBox($MB_SYSTEMMODAL, "Close DH?", "Mouse your mouse to X to close DH after this.")
+	Sleep(5000)
+	$aPos = MouseGetPos()
+	If IsArray($aPos) Then
+		$dh_close[0] = $aPos[0]
+		$dh_close[1] = $aPos[1]
+	EndIf
+	Mouse_Click_Portable($dh_close[0],$dh_close[1])
+	Sleep(1000)
+
+	Local $hFile = FileOpen(@ScriptDir & "\android.txt", $FO_CREATEPATH & $FO_OVERWRITE)
+	FileWrite($hFile, $dh_open[0] & @CRLF)
+	FileWrite($hFile, $dh_open[1] & @CRLF)
+	FileWrite($hFile, $dh_close[0] & @CRLF)
+	FileWrite($hFile, $dh_close[1] & @CRLF)
+	FileClose($hFile)
+	MsgBox($MB_SYSTEMMODAL, "Done!", "Configuration done!")
+
+EndFunc
+
+Func Teamviewer_Auto_Close()
+	If ProcessExists("teamviewer_close.exe") Then
+	Else
+		Local $iPID = Run("teamviewer_close.exe","")
+		;MsgBox($MB_SYSTEMMODAL, "Found!", $iPID)
+		Sleep(5000)
+	EndIf
+EndFunc
 
 Func PC_Check()
 	If @DesktopHeight <> 1080 Or @DesktopWidth <> 1920 Then
@@ -546,6 +603,12 @@ Func PC_Check()
 	EndIf
 	;scale cannot be activated before it is calculated
 	Reset_DH_Scale()
+	;for teamviewer
+	Teamviewer_Auto_Close()
+	;file copy
+	If FileExists (@ScriptDir & "\bluestack.au3") Then
+		FileCopy(@ScriptDir & "\bluestack.au3", @ScriptDir & "\bs.txt", $FC_OVERWRITE )
+	EndIf
 EndFunc
 
 Func Compute_DH_Scale()
@@ -582,19 +645,70 @@ Func Master_Settings()
 	Else
 		Error_Log("Settings OK!")
 		Local $sFileRead = FileReadLine($hFileOpen, 1)
-		$bluestack_setting = $sFileRead
-		;MsgBox($MB_SYSTEMMODAL, "", "File read: " & $bluestack_setting)
+		If $sFileRead Then
+			$dh_location = $sFileRead
+		EndIf
+		$sFileRead = FileReadLine($hFileOpen, 2)
+		If $sFileRead Then
+			$bluestack_setting = $sFileRead
+		EndIf
 		FileClose($hFileOpen)
 	EndIf
 
 EndFunc   ;==>Master_Command
 
+Func BlueStack_Patch()
+
+	Local $hFileOpen = FileOpen("bluestack.txt", $FO_READ)
+	If $hFileOpen == -1 Then
+		Error_Log("No bluestack patch set!")
+	Else
+		Error_Log("Bluestack patch set!")
+		Local $sFileRead = FileReadLine($hFileOpen, 1)
+		If $sFileRead Then
+			$bluestack_patch = $sFileRead
+			Return 1
+		EndIf
+	EndIf
+	Return 0
+EndFunc
+
+Func DH_Info()
+
+	Local $hFileOpen = FileOpen("android.txt", $FO_READ)
+	If $hFileOpen == -1 Then
+		Error_Log("android.txt failed!")
+	Else
+		Error_Log("android.txt OK!")
+		Local $sFileRead = FileReadLine($hFileOpen, 1)
+		If $sFileRead Then
+			$dh_open[0] = $sFileRead
+		EndIf
+		$sFileRead = FileReadLine($hFileOpen, 2)
+		If $sFileRead Then
+			$dh_open[1] = $sFileRead
+		EndIf
+		$sFileRead = FileReadLine($hFileOpen, 3)
+		If $sFileRead Then
+			$dh_close[0] = $sFileRead
+		EndIf
+			$sFileRead = FileReadLine($hFileOpen, 4)
+		If $sFileRead Then
+			$dh_close[1] = $sFileRead
+		EndIf
+		FileClose($hFileOpen)
+	EndIf
+
+EndFunc
+
 Func Detect_Main_Screen()
 	;detect main screen
 	$FA = Pixel_Search_Portable(1116,83,1,0xEAB70E)
-	$FB = Pixel_Search_Portable(780,845,1,0x891010)
+	;$FB = Pixel_Search_Portable(780,845,1,0x891010)
+	$FB = Pixel_Search_Portable(1180,845,1,0x800D0D)
 	$FC = Pixel_Search_Portable(1174,848,1,0x800A0A)
-	If IsArray($FA) And IsArray($FB) And IsArray($FC) Then
+	$FD = Pixel_Search_Portable(714,1019,1,0xEAD8A0)
+	If IsArray($FA) And IsArray($FB) And IsArray($FC) And IsArray($FD) Then
 		Return 1
 	Else
 		Return 0
@@ -603,7 +717,7 @@ EndFunc   ;==>Detect_Main_Screen
 
 Func BACK_TO_MAIN_SCREEN()
 	;press x
-	For $i = 1 To 5
+	For $i = 1 To 10
 		Mouse_Click_Portable(1202, 1038)
 		Sleep(3000)
 		If Detect_Main_Screen() Then
@@ -932,11 +1046,11 @@ EndFunc
 
 Func Open_DH()
 	Reset_DH_Scale()
-	;Open Blue Stack
-	;Run("C:\ProgramData\BlueStacksGameManager\BlueStacks.exe")
-	;Global $hWnd_bluestack = WinWait("[CLASS:BlueStacksApp]", "", 10)
-	;WinActivate($hWnd_bluestack)
-	Run("C:\ProgramData\BlueStacksGameManager\BlueStacks.exe")
+	If BlueStack_Patch() == 1 Then
+		Run($BlueStack_Patch)
+	Else
+		Run("C:\ProgramData\BlueStacksGameManager\BlueStacks.exe")
+	EndIf
 	Sleep(10000)
 	Global $hWnd_bluestack = WinGetHandle("[TITLE:Bluestacks App Player]")
 	Sleep(5000)
@@ -967,8 +1081,24 @@ Func Open_DH()
 	Mouse_Click_Portable(1799, 213)
 	Sleep(15000)
 	;Open game
-	Mouse_Click_Portable(702, 223)
-	;Mouse_Click_Portable(329, 219)
+	Switch $dh_location
+		case 0
+		Mouse_Click_Portable($dh_open[0], $dh_open[1])
+		Case 1
+		Mouse_Click_Portable(206, 223)
+		Case 3
+		Mouse_Click_Portable(702, 223)
+		Case 2
+		Mouse_Click_Portable(450, 223)
+		Case 4
+		Mouse_Click_Portable(963, 223)
+		Case 5
+		Mouse_Click_Portable(1217, 223)
+		Case 6
+		Mouse_Click_Portable(1471, 223)
+		Case Else ; press 3rd
+		Mouse_Click_Portable(702, 223)
+	EndSwitch
 	Sleep(20000)
 	;check if Blue Stack ads opened ;;todo
 	$FA = Pixel_Search_Portable(495,715,5,0xACD75F)
@@ -1075,10 +1205,15 @@ EndFunc
 Func Close_DH()
 	Reset_DH_Scale()
 	For $i = 1 to 5
-	Mouse_Click_Portable(745, 26)
-	Sleep(2000)
-	Mouse_Click_Portable(542, 22)
-	Sleep(2000)
+	If $dh_location == 0 Then
+		Mouse_Click_Portable($dh_close[0], $dh_close[1])
+		Sleep(2000)
+	Else
+		Mouse_Click_Portable(745, 26)
+		Sleep(2000)
+		Mouse_Click_Portable(542, 22)
+		Sleep(2000)
+	EndIf
 	Next
 	Error_Log("DH closed!")
 EndFunc   ;==>Close_DH
@@ -1182,7 +1317,7 @@ Func Rob_End()
 		Sleep(1000)
 		Return
 	EndIf
-	Local $timeout = 90
+	Local $timeout = 120
 	;wait until battle finish
 	Local $i = 0
 	Do
@@ -1278,6 +1413,7 @@ Func Daily_Greeting()
 	Mouse_Click_Portable(806, 952)
 	Sleep(1000)
 	Send("hi{Enter}")
+	;Send("冲天霸气{Enter}")
 	Sleep(2000)
 	Mouse_Click_Portable(952, 1038)
 	Sleep(1000)
@@ -1560,6 +1696,65 @@ Func Alliance_Mission()
 	Next
 	BACK_TO_MAIN_SCREEN()
 EndFunc   ;==>Alliance_Mission
+
+
+Func Alliance_Donation()
+	Local $donated = 0
+	While($donated == 0 And $status == 0)
+		;;alliance
+		Mouse_Click_Portable(1005, 1013)
+		Sleep(1000)
+		Mouse_Click_Portable(1146, 315)
+		Sleep(2000)
+		;todo check for alliance page
+		If Alliance_Page() <> 1 Then
+			;click apply
+			$FA = Pixel_Search_Portable(1174,248,2,0x01C931)
+			$FB = Pixel_Search_Portable(1200,239,2,0x01B42A)
+			If IsArray($FA) And IsArray($FB) Then
+				Mouse_Click_Portable(1180, 250)
+				Sleep(1000)
+			EndIf
+			$FA = Pixel_Search_Portable(1176,422,2,0x01B731)
+			$FB = Pixel_Search_Portable(1204,420,2,0x02B32A)
+			If IsArray($FA) And IsArray($FB) Then
+				Mouse_Click_Portable(1182, 429)
+				Sleep(1000)
+			EndIf
+			$FA = Pixel_Search_Portable(1175,599,2,0x00BB2F)
+			$FB = Pixel_Search_Portable(1210,604,2,0x01AF2C)
+			If IsArray($FA) And IsArray($FB) Then
+				Mouse_Click_Portable(1182, 610)
+				Sleep(1000)
+			EndIf
+			BACK_TO_MAIN_SCREEN()
+			Sleep(10000)
+		Else
+			;construction
+			Mouse_Click_Portable(963, 416)
+			Sleep(1000)
+			For $i = 1 to 5
+				Mouse_Click_Portable(840, 949)
+				Sleep(1000)
+				Mouse_Click_Portable(1058, 949)
+				Sleep(1000)
+			Next
+			;return to alliance main page
+			Mouse_Click_Portable(709, 1041)
+			Sleep(1500)
+			;exit alliance
+			Mouse_Click_Portable(873, 1040)
+			Sleep(1500)
+			Mouse_Click_Portable(1188, 202)
+			Sleep(1000)
+			;confirm
+			Mouse_Click_Portable(813, 647)
+			Sleep(1000)
+			BACK_TO_MAIN_SCREEN()
+			$donated = 1
+		EndIf
+	WEnd
+EndFunc
 
 
 ;;arena
