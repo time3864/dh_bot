@@ -4,17 +4,30 @@ Reset_DH_Scale()
 
 ;Daily_Greeting()
 
-Alliance_Donation()
+;Alliance_Donation()
 
+;Run("Bluestack_main.jpg")
+
+Onslaught_Mission()
+
+;Mouse_Move_Test()
 ;Occupy(779,248)
 ;Sleep(2000)
 ;Mining_Collection()
 
 ;Teamviewer_Auto_Close()
 
-	If FileExists (@ScriptDir & "\bluestack.au3") Then
-		FileCopy(@ScriptDir & "\bluestack.au3", @ScriptDir & "\bluestack.txt", $FC_OVERWRITE )
-	EndIf
+;Send("{ASC 2709}")
+
+
+;Send("{ASC &#0x51B2}")
+
+;Send("{ASC 20914}")
+;Send("{ASC 22825}")
+;Send("{ASC 38712}")
+;Send("{ASC 27668}")
+
+
 
 
 Func Check_Mine_01()

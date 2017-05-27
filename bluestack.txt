@@ -12,7 +12,6 @@ Global $player_count = 1
 Global $players_file = "players.txt"
 
 Global $master_mission = 0
-Global $login = 1
 
 Global $mission_run[101]
 Global $player_hour[24]
@@ -33,17 +32,10 @@ Global $bluestack_patch
 Global $bluestack_setting = 0
 Global $dh_location = 3
 Global $shutdown = 0
-Global $Paused = 0
 
 ;android program information
 Global $dh_open[2]
 Global $dh_close[2]
-Global $dh_icon[2]
-
-Global $bluestack_top
-Global $bluestack_bottom
-Global $bluestack_left
-Global $bluestack_right
 
 ;configuration file
 Global $player ; login id
@@ -95,16 +87,6 @@ Func _check()
 	Error_Log("Mission saved!")
 	Exit
 EndFunc   ;==>_check
-
-HotKeySet("^z", "_SLEEP")
-Func _SLEEP()
-    $Paused = NOT $Paused
-    While $Paused
-		ToolTip('Script is "Paused"',500,500)
-        sleep(10000)
-    WEnd
-	ToolTip("")
-EndFunc
 
 If 0 Then
 	;Send_Email()
@@ -175,10 +157,8 @@ Func Main_Controller()
 		If $player_active <> 0 And $player_hour[@HOUR] <> 0 Then
 			For $i = 1 To 8
 				$status = 0
-				If $login <> 0 Then
 				Open_DH()
 				LOGIN()
-				EndIf
 				If $status == 0 Then
 					All_Missions()
 				EndIf
@@ -487,7 +467,6 @@ Func All_Missions()
 			EndIf
 		Case 199 ; collection end
 			$current_mission = 199
-			Collect_Rewards()
 			If $status == 0 Then
 				FileDelete(@ScriptDir & "\save.txt")
 				Error_Log("##### All mission completed! #####")
@@ -610,17 +589,6 @@ Func Configure_BlueStack()
 	FileClose($hFile)
 	MsgBox($MB_SYSTEMMODAL, "Done!", "Configuration done!")
 
-EndFunc
-
-Func Mouse_Move_Test()
-	MouseMove(0,0)
-	Sleep(2000)
-	MouseMove(1920,0)
-	Sleep(2000)
-	MouseMove(0,1020)
-	Sleep(2000)
-	MouseMove(1920,1020)
-	Sleep(2000)
 EndFunc
 
 Func Teamviewer_Auto_Close()
@@ -1062,20 +1030,6 @@ Func DH_Scale_Calculate()
 	Error_Log($dh_x_scale & ":" & $dh_y_scale)
 EndFunc
 
-
-Func Detect_Bluestack($handler)
-	Local $aPos = WinGetPos($handler)
-
-	If IsArray($aPos) Then
-		$bluestack_top = $aPos[1]
-		$bluestack_bottom = $aPos[1] + $aPos[3]
-		$bluestack_left = $aPos[0]
-		$bluestack_right = $aPos[0] + $aPos[2]
-	Else
-		Error_Log("WinGetPos failed to detect Bluestack!")
-	EndIf
-EndFunc
-
 Func Maximize_Bluestack($handler)
 	Local $aPos = WinGetPos($handler)
 
@@ -1106,8 +1060,6 @@ Func Open_DH()
 	Sleep(5000)
 	WinActivate($hWnd_bluestack)
 	WinWaitActive($hWnd_bluestack, "", 30)
-	Detect_Bluestack($hWnd_bluestack)
-	;MsgBox($MB_SYSTEMMODAL, "Found!", $bluestack_left & ":" & $bluestack_right & ":" & $bluestack_top & ":" & $bluestack_bottom)
 	;need to check if Blue stack maximized ;;todo
 	If $bluestack_setting <> 0 Then
 		Maximize_Bluestack($hWnd_bluestack)
@@ -2550,10 +2502,10 @@ Func Onslaught_Mission()
 	;onslaught mode
 	Mouse_Click_Portable(984, 511)
 	Sleep(1000)
-	;Save_Screen()
+	Save_Screen()
 	;3 star sweep
 	For $i = 1 To 20
-		If Onslaught_Screen <> 0 Then
+		If Check_Screen() > 10 Then
 		;3 stars sweep
 		Mouse_Click_Portable(1148, 721)
 		Sleep(1000)
@@ -2619,19 +2571,6 @@ Func Onslaught_Mission()
 
 	BACK_TO_MAIN_SCREEN()
 EndFunc   ;==>Onslaught_Mission
-
-Func Onslaught_Screen()
-	$FA = Pixel_Search_Portable(1112,253,2,0x583413)
-	$FB = Pixel_Search_Portable(683,192,2,0x6E1204)
-	$FC = Pixel_Search_Portable(728,814,2,0xD7B664)
-	$FD = Pixel_Search_Portable(1163,839,2,0x810101)
-	$FE = Pixel_Search_Portable(1165,952,2,0xEBA77D)
-	If IsArray($FA) And IsArray($FB) And IsArray($FC) And IsArray($FD) And IsArray($FE) Then
-		Return 1
-	Else
-		Return 0
-	EndIf
-EndFunc
 
 Func Enemy_Gates()
 	;check front page
@@ -3487,7 +3426,7 @@ Func Clan_War_Internal_Random()
 			Next
 			Clan_War_Exit_City()
 			$clan_war_city = $clan_war_city + 1
-			If $clan_war_city == 5 Then $clan_war_city = 1
+			If $clan_war_city == 11 Then $clan_war_city = 1
 		WEnd
 	Else
 		$status = 1
@@ -3686,7 +3625,7 @@ EndFunc
 
 Func Dungeon_Bot()
 	Event_Dungeon_Init()
-	;$current_event_dungeon_map = 0
+	;$current_event_dungeon_map = 1
 	For $map = $current_event_dungeon_map to 2 ; 3 maps
 	If Dungeon_Event_Enter() == 1 Then
 		Dungeon_Event_Map_Enter($map)
