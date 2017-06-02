@@ -14,8 +14,8 @@ $shutdown = 1
 $master_mission = 0
 
 If @HOUR == 12 Or @HOUR == 18 Then
-;$master_mission = 200
-;$shutdown = 0
+$master_mission = 200
+$shutdown = 0
 EndIf
 
 Main_Controller()

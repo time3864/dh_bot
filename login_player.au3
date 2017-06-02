@@ -1,6 +1,6 @@
 #include "bluestack.au3"
 
-Reset_DH_Scale()
+PC_SET_SCALE()
 
-PLAYER_INFO(3)
+PLAYER_INFO(5)
 LOGIN_PLAYER()
