@@ -40,6 +40,8 @@ Global $Paused = 0
 Global $script_timeout = 0
 Global $script_hours = 0
 Global $script_minutes = 0
+Global $fast_bot = 0
+Global $no_retry = 0
 
 ;android program information
 Global $dh_open[2]
@@ -194,7 +196,11 @@ Func Main_Controller()
 			For $i = 1 To 8
 				$status = 0
 				If $login <> 0 Then
-				Open_DH()
+				If $fast_bot == 1 Then
+					Open_DH_Express()
+				Else
+					Open_DH()
+				EndIf
 				LOGIN()
 				EndIf
 				If $status == 0 Then
@@ -225,8 +231,9 @@ Func Main_Controller()
 	Error_Log("No more player!")
 
 	If $shutdown == 1 Then
-		;shutdown after 20 minutes
-		For $i = 1 to 20
+		Error_Log("Shutdown......")
+		;shutdown after 10 minutes
+		For $i = 1 to 10
 			Sleep(60000)
 		Next
 		Shutdown($SD_SHUTDOWN)
@@ -274,21 +281,21 @@ Func All_Missions()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
-		Case 7
+		case 7
 			$current_mission = 7
-			If ($mission_run[$current_mission]) Then Alliance_Mission()
+			If ($mission_run[$current_mission]) Then Collect_Daily_Pack()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 8
 			$current_mission = 8
-			If ($mission_run[$current_mission]) Then Souls_Battlefield()
+			If ($mission_run[$current_mission]) Then Extra_Return()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 9
 			$current_mission = 9
-			If ($mission_run[$current_mission]) Then Rob_Mission(5)
+			If ($mission_run[$current_mission]) Then Collect_Monthly()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
@@ -300,42 +307,142 @@ Func All_Missions()
 			EndIf
 		Case 11
 			$current_mission = 11
-			If ($mission_run[$current_mission]) Then Arena_Mission()
+			If ($mission_run[$current_mission]) Then Mission_Rewards()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 12
 			$current_mission = 12
-			If ($mission_run[$current_mission]) Then Arena_Rewards()
+			If ($mission_run[$current_mission]) Then Admire_crw()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 13
 			$current_mission = 13
-			If ($mission_run[$current_mission]) Then Admire_crw()
+			If ($mission_run[$current_mission]) Then General_Cultivate()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 14
 			$current_mission = 14
-			If ($mission_run[$current_mission]) Then Legend_General_Sweep()
+			If ($mission_run[$current_mission]) Then Weapon_Refine()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 15
 			$current_mission = 15
-			;empty
+			If ($mission_run[$current_mission]) Then Recruit_5_times()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 16
 			$current_mission = 16
-			If ($mission_run[$current_mission]) Then General_Cultivate()
+			If ($mission_run[$current_mission]) Then
+				Spirit_Search()
+				Spirit_Search_Gold()
+			EndIf
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 17
 			$current_mission = 17
+			If ($mission_run[$current_mission]) Then Friend_Blessing()
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 18
+			$current_mission = 18
+			If ($mission_run[$current_mission]) Then Altar_Spin()
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 19
+			$current_mission = 19
+			If ($mission_run[$current_mission]) Then Elite_Mode(1090) ;hard mode
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		case 20
+			$current_mission = 20
+			If @WDAY == 6 Then
+				Clan_War_Cross_Boost()
+			EndIf
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		case 21
+			$current_mission = 21
+			If @WDAY == 3 Then
+				Combine_Equipment()
+				Combine_General()
+			EndIf
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 22
+			$current_mission = 22
+			If ($mission_run[$current_mission]) Then
+				If @WDAY == 2 or @WDAY == 4 Or @WDAY == 6 Then
+					Break_Weapon()
+					Break_Soul()
+				EndIf
+			EndIf
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		case 23
+			$current_mission = 23
+			If @WDAY == 1 Then
+				Alliance_Dungeon_Rewards()
+			EndIf
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+
+		Case 30
+			$current_mission = 30
+			If ($mission_run[$current_mission]) Then Alliance_Mission()
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 31
+			$current_mission = 31
+			If ($mission_run[$current_mission]) Then War_Battle(1)
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 32
+			$current_mission = 32
+			If ($mission_run[$current_mission]) Then Rob_Mission(5)
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 33
+			$current_mission = 33
+			If ($mission_run[$current_mission]) Then Legend_General_Sweep()
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 34
+			$current_mission = 34
+			If ($mission_run[$current_mission]) Then Souls_Battlefield()
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 35
+			$current_mission = 35
+			If ($mission_run[$current_mission]) Then Arena_Mission()
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 36
+			$current_mission = 36
+			If ($mission_run[$current_mission]) Then Arena_Rewards()
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 37
+			$current_mission = 37
 			If ($mission_run[$current_mission]) Then
 				If @WDAY == 2 Then
 					Group_Battle(5)
@@ -346,188 +453,118 @@ Func All_Missions()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
-		Case 18
-			$current_mission = 18
-			If ($mission_run[$current_mission]) Then Weapon_Refine()
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		Case 19
-			$current_mission = 19
-			If ($mission_run[$current_mission]) Then Altar_Spin()
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		Case 20
-			$current_mission = 20
-			If ($mission_run[$current_mission]) Then Onslaught_Mission()
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		Case 21
-			$current_mission = 21
-			If ($mission_run[$current_mission]) Then Collect_Gate_Rewards()
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		Case 22
-			$current_mission = 22
-			If ($mission_run[$current_mission]) Then
-				If @WDAY == 4 or @WDAY == 2 Then
-					Break_Weapon()
-					Break_Soul()
-				EndIf
-			EndIf
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		Case 23
-			$current_mission = 23
-			If ($mission_run[$current_mission]) Then Recruit_5_times()
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		Case 24
-			$current_mission = 24
-			If ($mission_run[$current_mission]) Then
-				Spirit_Search()
-				Spirit_Search_Gold()
-			EndIf
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		Case 25
-			$current_mission = 25
-			;empty
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		Case 26
-			$current_mission = 26
-			If ($mission_run[$current_mission]) Then Borrow_Arrow()
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		Case 27
-			$current_mission = 27
+		Case 38
+			$current_mission = 38
 			If ($mission_run[$current_mission]) Then Tomb_Raid()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
-		Case 28
-			$current_mission = 28
-			If ($mission_run[$current_mission]) Then Friend_Blessing()
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		Case 29
-			$current_mission = 29
+		Case 39
+			$current_mission = 39
 			If ($mission_run[$current_mission]) Then Mystic_Legend_General()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
-		Case 30
-			$current_mission = 30
-			If ($mission_run[$current_mission]) Then Elite_Mode(1090) ;hard mode
+		Case 40
+			$current_mission = 40
+			If ($mission_run[$current_mission]) Then Borrow_Arrow()
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 50
+			$current_mission = 50
+			If ($mission_run[$current_mission]) Then Onslaught_Mission()
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 51
+			$current_mission = 51
+			If ($mission_run[$current_mission]) Then Collect_Gate_Rewards()
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 99 ; collection end
+			$current_mission = 99
+			Collect_Rewards()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 100 ; mainly for collection
 			$current_mission = 100
-			Collect_Daily_Pack()
-			Collect_Weekly_Rewards()
-			Tax_Collection()
+			;Scheduled_Task()
+			;Clear_Token()
+			Collect_Token()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 101
 			$current_mission = 101
-			Extra_Return()
+			Elite_Mode(817)
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 102
 			$current_mission = 102
-			Collect_Rewards()
+			War_Battle(8)
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 103
 			$current_mission = 103
-			Collect_Monthly()
+			Flags()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 104
 			$current_mission = 104
-			Collect_Token()
+
 			If $status == 0 Then
 				ContinueCase
 			EndIf
 		Case 105
 			$current_mission = 105
+
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 111
+			$current_mission = 111
+			Tax_Collection()
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 112
+			$current_mission = 112
 			Free_Recruit()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
-		Case 106
-			$current_mission = 106
-			Mission_Rewards()
+		Case 113
+			$current_mission = 113
+			Spirit_Search()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
-		Case 107
-			$current_mission = 107
-			Tax_Collection()
-			Collect_Token()
-			Clear_Token()
+		Case 114
+			$current_mission = 114
+			Spirit_Search_Gold()
 			If $status == 0 Then
 				ContinueCase
 			EndIf
-		case 108
-			$current_mission = 108
-			If @WDAY == 1 Then
-				Alliance_Dungeon_Rewards()
-			EndIf
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		case 109
-			$current_mission = 109
-			If @WDAY == 6 Then
-				Clan_War_Cross_Boost()
-			EndIf
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		case 110
-			$current_mission = 110
-			If @WDAY == 3 Then
-				Combine_Equipment()
-				Combine_General()
-			EndIf
-			If $status == 0 Then
-				ContinueCase
-			EndIf
-		case 197
+		Case 115
+			$current_mission = 115
 
-		case 198
-
-		Case 199 ; collection end
+			If $status == 0 Then
+				ContinueCase
+			EndIf
+		Case 199
 			$current_mission = 199
 			Collect_Rewards()
 			If $status == 0 Then
 				FileDelete(@ScriptDir & "\save.txt")
 				Error_Log("##### All mission completed! #####")
 			EndIf ;finish all mission, quit
-		Case 200
-			$current_mission = 200
-			Scheduled_Task()
-			Collect_Rewards()
-			If $status == 0 Then
-				FileDelete(@ScriptDir & "\save.txt")
-				Error_Log("##### All mission completed! #####")
-			EndIf ;finish all mission, quit
+
 		Case 300
 			$current_mission = 300
 			Weekly_Task()
@@ -596,6 +633,14 @@ EndFunc
 
 Func Compute_Y_Coordinate(ByRef $y,$PC)
 	$y = $dh_y[0] + ($y - $dh_y_base[$PC][0]) * $dh_y_scale[$PC]
+EndFunc
+
+Func SLEEP_ADJUST($time)
+	If $fast_bot == 1 Then
+		Sleep($time/2)
+	Else
+		Sleep($time)
+	EndIf
 EndFunc
 
 Func Error_Log($log)
@@ -680,7 +725,7 @@ Func PC_Check()
 	Teamviewer_Auto_Close()
 	;file copy
 	If FileExists (@ScriptDir & "\bluestack.au3") Then
-		FileCopy(@ScriptDir & "\bluestack.au3", @ScriptDir & "\bs.txt", $FC_OVERWRITE )
+		FileCopy(@ScriptDir & "\bluestack.au3", @ScriptDir & "\bluestack.au3.txt", $FC_OVERWRITE )
 	EndIf
 EndFunc
 
@@ -828,9 +873,7 @@ Func BACK_TO_MAIN_SCREEN()
 			Return
 		EndIf
 	Next
-	Error_Log("Mission failed!")
-	;MsgBox($MB_SYSTEMMODAL, "Terminated!", "Main screen failed! Current mission: " & $current_mission)
-	;STOP_SCRIPT()
+	Error_Log("Main screen failed!")
 	$status = 1
 EndFunc   ;==>BACK_TO_MAIN_SCREEN
 
@@ -1003,9 +1046,59 @@ Func LOGIN_PLAYER()
 	Sleep(1000)
 	;click login
 	Mouse_Click_Portable(0, 944, 676)
-	Sleep(10000)
+	Sleep(15000)
 EndFunc   ;==>LOGIN_PLAYER
 
+
+Func LOGIN_PLAYER_EXPRESS()
+	;click server
+	Mouse_Click_Portable(0, 1124, 82)
+	Sleep(2500)
+	;drag up
+	Mouse_Drag_Portable(0, 938, 888, 938, 505)
+	Sleep(800)
+	Mouse_Drag_Portable(0, 938, 888, 938, 505)
+	Sleep(800)
+	;choose server
+	If $server == 4 Then
+		Mouse_Click_Portable(0, 1119, 724)
+		Sleep(2000)
+	ElseIf $server == 6 Then
+		Mouse_Click_Portable(0, 1119, 645)
+		Sleep(2000)
+	ElseIf $server == 5 Then
+		Mouse_Click_Portable(0, 820, 725)
+		Sleep(2000)
+	Else
+		Mouse_Click_Portable(0, 814, 886)
+		Sleep(2000)
+	EndIf
+	;user login
+	Mouse_Click_Portable(0, 814, 84)
+	Sleep(100)
+	;email
+	Mouse_Click_Portable(0, 950, 690)
+	Sleep(1000)
+	;click account
+	Mouse_Click_Portable(0, 994, 442)
+	Sleep(1000)
+	Mouse_Click_Portable(0, 994, 442)
+	Sleep(1000)
+	Send($player)
+	Send("{Enter}")
+	Sleep(1000)
+	;click password
+	Mouse_Click_Portable(0, 994, 515)
+	Sleep(1000)
+	Mouse_Click_Portable(0, 994, 515)
+	Sleep(1000)
+	Send($password)
+	Send("{Enter}")
+	Sleep(1000)
+	;click login
+	Mouse_Click_Portable(0, 944, 676)
+	Sleep(15000)
+EndFunc
 
 Func Exclude_Mission()
 	For $i = 1 To 100
@@ -1282,8 +1375,11 @@ Func Open_DH()
 EndFunc
 
 Func LOGIN()
-	LOGIN_PLAYER()
-	Sleep(15000)
+	If $fast_bot == 1 Then
+		LOGIN_PLAYER_EXPRESS()
+	Else
+		LOGIN_PLAYER()
+	EndIf
 
 	;Check for robbed
 	$FA = Pixel_Search_Portable(0, 837,884,1,0x01B429)
@@ -1291,8 +1387,8 @@ Func LOGIN()
 	$FC = Pixel_Search_Portable(0, 974,624,1,0x403b37)
 	If IsArray($FA) And IsArray($FB) And IsArray($FC) Then
 		Mouse_Click_Portable(0, 841, 893)
+		Sleep(10000)
 	EndIf
-	Sleep(10000)
 
 	If Detect_Main_Screen() == 1 Then
 		Mouse_Click_Portable(0, 944, 532)
@@ -1307,57 +1403,85 @@ Func LOGIN()
 EndFunc   ;==>Open_DH
 
 Func Open_DH_Express()
-	;Open Blue Stack
-	Run("C:\ProgramData\BlueStacksGameManager\BlueStacks.exe")
-	Local $hWnd = WinWait("[CLASS:BlueStacksApp]", "", 5)
-	WinActivate($hWnd)
+	Reset_DH_Scale()
+	If BlueStack_Patch() == 1 Then
+		Run($BlueStack_Patch)
+	Else
+		Run("C:\ProgramData\BlueStacksGameManager\BlueStacks.exe")
+	EndIf
+	Sleep(1000)
+	Global $hWnd_bluestack = WinGetHandle("[TITLE:Bluestacks App Player]")
+	Sleep(2000)
+	If $hWnd_bluestack == 0 Then
+		Error_Log("Bluestack handler failed!")
+	EndIf
+	WinActivate($hWnd_bluestack)
+	WinWaitActive($hWnd_bluestack, "", 10)
+	Detect_Bluestack($hWnd_bluestack)
+	;MsgBox($MB_SYSTEMMODAL, "Found!", $bluestack_left & ":" & $bluestack_right & ":" & $bluestack_top & ":" & $bluestack_bottom)
 	;need to check if Blue stack maximized ;;todo
-
+	If $bluestack_setting <> 0 Then
+		Maximize_Bluestack($hWnd_bluestack)
+	EndIf
 	;go to "Android tab"
-	Mouse_Click_Portable(0, 386, 30)
+	Mouse_Click_Portable(0, 320, 30)
 	Sleep(3000)
 	;click back to main page
 	Mouse_Click_Portable(0, 34, 31)
-	Sleep(3000)
+	Sleep(2000)
 	;drag up
-	For $i = 1 to 3
 	Mouse_Drag_Portable(0, 938, 474, 938, 888)
 	Sleep(500)
-	Next
+	Mouse_Drag_Portable(0, 938, 474, 938, 888)
+	Sleep(500)
+	Mouse_Drag_Portable(0, 938, 474, 938, 888)
+	Sleep(500)
+	Mouse_Drag_Portable(0, 938, 474, 938, 888)
+	Sleep(500)
+	Mouse_Drag_Portable(0, 938, 474, 938, 888)
+	Sleep(500)
 	;open all apps
 	Mouse_Click_Portable(0, 1799, 213)
-	Sleep(3000)
+	Sleep(8000)
 	;Open game
-	Mouse_Click_Portable(0, 702, 223)
-	Sleep(10000)
+	Switch $dh_location
+		case 0
+		Mouse_Click_Portable(0, $dh_open[0], $dh_open[1])
+		Case 1
+		Mouse_Click_Portable(0, 206, 223)
+		Case 3
+		Mouse_Click_Portable(0, 702, 223)
+		Case 2
+		Mouse_Click_Portable(0, 450, 223)
+		Case 4
+		Mouse_Click_Portable(0, 963, 223)
+		Case 5
+		Mouse_Click_Portable(0, 1217, 223)
+		Case 6
+		Mouse_Click_Portable(0, 1471, 223)
+		Case Else ; press 3rd
+		Mouse_Click_Portable(0, 702, 223)
+	EndSwitch
+	Sleep(15000)
 	;check if Blue Stack ads opened ;;todo
 	$FA = Pixel_Search_Portable(0, 495,715,5,0xACD75F)
 	$FB = Pixel_Search_Portable(0, 1315,711,5,0x5DB6D4)
 	$FC = Pixel_Search_Portable(0, 955,171,5,0x65A020)
 	$FD = Pixel_Search_Portable(0, 945,531,5,0x5D6C71)
 	If IsArray($FA) And IsArray($FB) And IsArray($FC) And IsArray($FD) Then
+		Error_Log("Advertisement!")
 		Mouse_Click_Portable(0, 1402, 717)
-		Sleep(8000)
+		Sleep(15000)
+		$status = 1
+		Return
 	EndIf
+	Compute_DH_Scale()
 	;Check for front page
 	$FA = Pixel_Search_Portable(0, 1001,369,1,0xFFFFFF)
 	$FB = Pixel_Search_Portable(0, 750,910,1,0xFFE075)
 	$FC = Pixel_Search_Portable(0, 927,245,1,0x393931)
 	If IsArray($FA) And IsArray($FB) And IsArray($FC) Then
 		Error_Log("DH opened!")
-	EndIf
-
-	Mouse_Click_Portable(0, 997, 546)
-	Sleep(10000)
-
-	If Detect_Main_Screen() == 1 Then
-		Mouse_Click_Portable(0, 944, 532)
-		Error_Log("Account opened!")
-	Else
-		$status = 1
-		Error_Log("Program failed!")
-		;MsgBox($MB_SYSTEMMODAL, "Terminated!", "Main screen failed!")
-		;STOP_SCRIPT()
 	EndIf
 EndFunc
 
@@ -1366,12 +1490,12 @@ Func Close_DH()
 	For $i = 1 to 5
 	If $dh_location == 0 Then
 		Mouse_Click_Portable(0, $dh_close[0], $dh_close[1])
-		Sleep(2000)
+		Sleep(1000)
 	Else
 		Mouse_Click_Portable(0, 745, 26)
-		Sleep(2000)
+		Sleep(1000)
 		Mouse_Click_Portable(0, 542, 22)
-		Sleep(2000)
+		Sleep(1000)
 	EndIf
 	Next
 	Error_Log("DH closed!")
@@ -1738,7 +1862,7 @@ Func Alliance_Mission()
 	;temple worship
 	Mouse_Click_Portable(0, 959, 610)
 	Sleep(1000)
-	For $i = 1 To 5
+	For $i = 1 To 2
 		Mouse_Click_Portable(0, 960, 1002)
 		Sleep(1000)
 		Mouse_Click_Portable(0, 823, 645)
@@ -1859,7 +1983,11 @@ EndFunc   ;==>Alliance_Mission
 
 Func Alliance_Donation()
 	Local $donated = 0
-	While($donated == 0 And $status == 0)
+	Local $failed = 0
+	Local $quitted = 0
+	Local $applied = 0
+	Local $timeout = 60
+	While($donated == 0 And $status == 0 And $failed == 0)
 		;;alliance
 		Mouse_Click_Portable(0, 1005, 1013)
 		Sleep(1000)
@@ -1873,48 +2001,218 @@ Func Alliance_Donation()
 			If IsArray($FA) And IsArray($FB) Then
 				Mouse_Click_Portable(0, 1180, 250)
 				Sleep(1000)
+			Else
+				$applied = 1
 			EndIf
 			$FA = Pixel_Search_Portable(0, 1176,422,2,0x01B731)
 			$FB = Pixel_Search_Portable(0, 1204,420,2,0x02B32A)
 			If IsArray($FA) And IsArray($FB) Then
 				Mouse_Click_Portable(0, 1182, 429)
 				Sleep(1000)
+			Else
+				$applied = 1
 			EndIf
 			$FA = Pixel_Search_Portable(0, 1175,599,2,0x00BB2F)
 			$FB = Pixel_Search_Portable(0, 1210,604,2,0x01AF2C)
 			If IsArray($FA) And IsArray($FB) Then
 				Mouse_Click_Portable(0, 1182, 610)
 				Sleep(1000)
+			Else
+				$applied = 1
 			EndIf
 			BACK_TO_MAIN_SCREEN()
 			Sleep(10000)
+			$timeout = $timeout - 1
+			If $timeout == 0 Then
+				$failed = 1
+				Error_Log("Application failed:" & $player & ":" & $server & ":" & $applied)
+			EndIf
 		Else
-			;construction
-			Mouse_Click_Portable(0, 963, 416)
-			Sleep(1000)
-			For $i = 1 to 5
-				Mouse_Click_Portable(0, 840, 949)
-				Sleep(1000)
-				Mouse_Click_Portable(0, 1058, 949)
-				Sleep(1000)
-			Next
-			;return to alliance main page
-			Mouse_Click_Portable(0, 709, 1041)
-			Sleep(1500)
-			;exit alliance
-			Mouse_Click_Portable(0, 873, 1040)
-			Sleep(1500)
-			Mouse_Click_Portable(0, 1188, 202)
-			Sleep(1000)
-			;confirm
-			Mouse_Click_Portable(0, 813, 647)
-			Sleep(1000)
-			BACK_TO_MAIN_SCREEN()
-			$donated = 1
+			Alliance_Donation_Mission()
+
+			$donated = Alliance_Quit()
 		EndIf
 	WEnd
+	; check status
 EndFunc
 
+
+Func Alliance_Quit()
+	;;alliance
+	Mouse_Click_Portable(0, 1005, 1013)
+	Sleep(1000)
+	Mouse_Click_Portable(0, 1146, 315)
+	Sleep(1000)
+	;todo check for alliance page
+	If Alliance_Page() <> 1 Then
+		BACK_TO_MAIN_SCREEN()
+		Return 0
+	EndIf
+	;quit alliance
+	Mouse_Click_Portable(0, 873, 1040)
+	Sleep(1500)
+	Mouse_Click_Portable(0, 1188, 202)
+	Sleep(1000)
+	$FA = Pixel_Search_Portable(1, 799,625,2,0x10BD10)
+	$FB = Pixel_Search_Portable(1, 1088,631,2,0xBB1F0E)
+	$FC = Pixel_Search_Portable(1, 1183,346,2,0xD0CABA)
+	If IsArray($FA) And IsArray($FB) And IsArray($FC) Then
+		;confirm
+		Mouse_Click_Portable(0, 813, 647)
+		Sleep(1000)
+		BACK_TO_MAIN_SCREEN()
+		Return 1
+	EndIf
+	BACK_TO_MAIN_SCREEN()
+	Return 0
+EndFunc
+
+Func Alliance_Donation_Mission()
+
+	;construction
+	Mouse_Click_Portable(0, 963, 416)
+	Sleep(1000)
+	For $i = 1 to 5
+		Mouse_Click_Portable(0, 840, 949)
+		Sleep(1000)
+		Mouse_Click_Portable(0, 1058, 949)
+		Sleep(1000)
+	Next
+	;return to alliance main page
+	Mouse_Click_Portable(0, 709, 1041)
+	Sleep(1000)
+	;temple worship
+	Mouse_Click_Portable(0, 959, 610)
+	Sleep(1000)
+	For $i = 1 To 2
+		Mouse_Click_Portable(0, 960, 1002)
+		Sleep(1000)
+		Mouse_Click_Portable(0, 823, 645)
+		Sleep(1000)
+		Mouse_Click_Portable(0, 958, 691)
+		Sleep(1000)
+	Next
+	;return to alliance main page
+	Mouse_Click_Portable(0, 709, 1041)
+	Sleep(1000)
+
+	;internal server war rewards
+	;drag to top
+	Mouse_Drag_Portable(0, 938, 474, 938, 828)
+	Sleep(1000)
+	Mouse_Drag_Portable(0, 938, 474, 938, 828)
+	Sleep(1000)
+	Mouse_Drag_Portable(0, 938, 474, 938, 828)
+	Sleep(1000)
+	;drag one page down
+	Mouse_Drag_Portable(0, 938, 721, 938, 309)
+	Sleep(1000)
+	;;war page collect rewards
+	Mouse_Click_Portable(0, 972, 837)
+	Sleep(5000)
+	Mouse_Click_Portable(0, 1190, 115)
+	Sleep(1000)
+	Mouse_Click_Portable(0, 950, 1030)
+	Sleep(1000)
+	;return to alliance main page
+	Mouse_Click_Portable(0, 709, 1041)
+	Sleep(1000)
+	;return to alliance main page
+	Mouse_Click_Portable(0, 709, 1041)
+	Sleep(1000)
+
+	;cross server war rewards
+	;drag to top
+	Mouse_Drag_Portable(0, 938, 474, 938, 828)
+	Sleep(1000)
+	Mouse_Drag_Portable(0, 938, 474, 938, 828)
+	Sleep(1000)
+	Mouse_Drag_Portable(0, 938, 474, 938, 828)
+	Sleep(1000)
+	;drag one page down
+	Mouse_Drag_Portable(0, 938, 721, 938, 309)
+	Sleep(1000)
+	Mouse_Drag_Portable(0, 938, 721, 938, 309)
+	Sleep(1000)
+	;;war page collect rewards
+	Mouse_Click_Portable(0, 967, 622)
+	Sleep(5000)
+	Mouse_Click_Portable(0, 1190, 115)
+	Sleep(1000)
+	Mouse_Click_Portable(0, 950, 1030)
+	Sleep(1000)
+	;return to alliance main page
+	Mouse_Click_Portable(0, 709, 1041)
+	Sleep(1000)
+	;return to alliance main page
+	Mouse_Click_Portable(0, 709, 1041)
+	Sleep(1000)
+
+	;drag to bottom
+	Mouse_Drag_Portable(0, 938, 882, 938, 474)
+	Sleep(1000)
+	Mouse_Drag_Portable(0, 938, 882, 938, 474)
+	Sleep(1000)
+	Mouse_Drag_Portable(0, 938, 882, 938, 474)
+	Sleep(1000)
+	;;alliance dungeon
+	;;todo need to check for war
+	Mouse_Click_Portable(0, 954, 571)
+	Sleep(2000)
+	;buy 2 times
+	Mouse_Click_Portable(1, 1079, 173)
+	Sleep(1000)
+	$FA = Pixel_Search_Portable(1, 943,704,2,0x0EC10E)
+	$FB = Pixel_Search_Portable(1, 800,520,2,0xD81A02)
+	If IsArray($FA) And IsArray($FB) Then
+		Mouse_Click_Portable(1, 1118, 587)
+		Sleep(1000)
+		Mouse_Click_Portable(1, 956, 720)
+		Sleep(1000)
+	EndIf
+	Save_Screen()
+	For $i = 1 To 5
+		Mouse_Click_Portable(0, 954, 306)
+		Sleep(5000)
+		If Check_Screen() < 10 Then
+		Mouse_Click_Portable(0, 954, 1032)
+		Sleep(8000)
+		Mouse_Click_Portable(0, 1215, 1036)
+		Sleep(5000)
+		Mouse_Click_Portable(0, 960, 823)
+		Sleep(5000)
+		EndIf
+	Next
+	BACK_TO_MAIN_SCREEN()
+EndFunc
+
+Func Alliance_Leader()
+	While $status == 0
+	;;alliance
+	Mouse_Click_Portable(0, 1005, 1013)
+	Sleep(1000)
+	Mouse_Click_Portable(0, 1146, 315)
+	Sleep(1000)
+	;todo check for alliance page
+	If Alliance_Page() <> 1 Then
+		BACK_TO_MAIN_SCREEN()
+		Return
+	EndIf
+	Mouse_Click_Portable(1, 873, 1035)
+	Sleep(1500)
+	$FA = Pixel_Search_Portable(1, 811,1014,2,0xCE0829)
+	$FB = Pixel_Search_Portable(1, 876,1018,2,0x038103)
+	If IsArray($FA) And IsArray($FB) Then
+		Mouse_Click_Portable(1, 873, 1035)
+		Sleep(2000)
+		Mouse_Click_Portable(1, 1073, 299)
+		Sleep(1500)
+		Mouse_Click_Portable(1, 1073, 440)
+		Sleep(1500)
+	EndIf
+	BACK_TO_MAIN_SCREEN()
+	WEnd
+EndFunc
 
 ;;arena
 Func Arena_Mission()
@@ -3218,6 +3516,12 @@ EndFunc   ;==>Collect_Daily_Pack
 
 
 Func Collect_Token()
+	If @HOUR == 12 or @HOUR == 13 Or @HOUR == 18 Or @HOUR == 19 Then
+
+	Else
+		Return
+	EndIf
+
 	;click event
 	Mouse_Click_Portable(0, 1211, 541)
 	Sleep(2000)
@@ -3568,11 +3872,11 @@ EndFunc   ;==>Weekly_Task
 
 
 Func Scheduled_Task()
-
 Clear_Token()
-
+Tax_Collection()
 Free_Recruit()
-
+Spirit_Search()
+Spirit_Search_Gold()
 EndFunc   ;==>Scheduled_Task
 
 Func Clear_Token()

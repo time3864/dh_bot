@@ -10,4 +10,5 @@ PC_SET_SCALE()
 ;MsgBox($MB_SYSTEMMODAL, "Check 01:", "Do you able to see DH main screen now:" & Legend_General_Cleared() )
 
 
-Legend_General_Sweep()
+;Alliance_Leader()
+Alliance_Donation()
