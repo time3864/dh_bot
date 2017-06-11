@@ -586,6 +586,9 @@ Func All_Missions()
 		Case 900
 			$current_mission = 900
 			Alliance_Donation()
+		Case 950
+			$current_mission = 950
+			Alliance_Donation_Leader()
 		case 1000
 			$current_mission = 1000
 			Dungeon_Bot()
@@ -2186,7 +2189,7 @@ Func Alliance_Donation_Mission()
 	BACK_TO_MAIN_SCREEN()
 EndFunc
 
-Func Alliance_Leader()
+Func Alliance_Donation_Leader()
 	While $status == 0
 	;;alliance
 	Mouse_Click_Portable(0, 1005, 1013)
