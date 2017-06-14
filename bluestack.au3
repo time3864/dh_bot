@@ -10,6 +10,7 @@ Global $status = 0
 Global $player_count = 1
 
 Global $players_file = "players.txt"
+Global $players_loopback = "players_miss.txt"
 
 Global $master_mission = 0
 Global $login = 1
@@ -42,6 +43,7 @@ Global $script_hours = 0
 Global $script_minutes = 0
 Global $fast_bot = 0
 Global $no_retry = 0
+Global $retries = 8
 
 ;android program information
 Global $dh_open[2]
@@ -193,7 +195,7 @@ Func Main_Controller()
 			$current_mission = $master_mission
 		EndIf
 		If $player_active <> 0 And $player_hour[@HOUR] <> 0 Then
-			For $i = 1 To 8
+			For $i = 1 To $retries
 				$status = 0
 				If $login <> 0 Then
 				If $fast_bot == 1 Then
@@ -649,7 +651,7 @@ EndFunc
 Func Error_Log($log)
 	Local $hFile = FileOpen(@ScriptDir & "\alog.txt", $FO_CREATEPATH & $FO_APPEND)
 
-	_FileWriteLog($hFile, "Player: " & $player & " Current mission: " & $current_mission & " Reason: " & $log & @CRLF) ; Write to the logfile passing the filehandle returned by FileOpen.
+	_FileWriteLog($hFile, "Player: " & $player & ":" & $server &" Current mission: " & $current_mission & " Reason: " & $log & @CRLF) ; Write to the logfile passing the filehandle returned by FileOpen.
 	FileClose($hFile) ; Close the filehandle to release the file.
 EndFunc   ;==>Error_Log
 
@@ -982,6 +984,20 @@ Func PLAYER_INFO($number)
 	EndIf
 
 EndFunc   ;==>PLAYER_INFO
+
+Func PLAYER_INFO_LOOPBACK()
+	If $players_loopback <> Null Then
+	Local $hFile = FileOpen(@ScriptDir & "\" & $players_loopback, $FO_CREATEPATH & $FO_APPEND)
+	FileWrite($hFile, $player & @CRLF)
+	FileWrite($hFile, $password & @CRLF)
+	FileWrite($hFile, $server & @CRLF)
+	FileWrite($hFile, 1 & @CRLF)
+	FileWrite($hFile, 1 & @CRLF)
+	FileWrite($hFile, 0 & @CRLF)
+	FileWrite($hFile, 25 & @CRLF)
+	FileClose($hFile)
+	EndIf
+EndFunc
 
 Func Player_Control($player_email, ByRef $enable)
 
@@ -2004,6 +2020,13 @@ Func Alliance_Donation()
 			If IsArray($FA) And IsArray($FB) Then
 				Mouse_Click_Portable(0, 1180, 250)
 				Sleep(1000)
+				;check for application status
+				$FA = Pixel_Search_Portable(0, 1174,248,2,0x01C931)
+				$FB = Pixel_Search_Portable(0, 1200,239,2,0x01B42A)
+				If IsArray($FA) And IsArray($FB) Then
+				Else
+				$applied = 1
+				EndIf
 			Else
 				$applied = 1
 			EndIf
@@ -2012,6 +2035,13 @@ Func Alliance_Donation()
 			If IsArray($FA) And IsArray($FB) Then
 				Mouse_Click_Portable(0, 1182, 429)
 				Sleep(1000)
+				;check for application status
+				$FA = Pixel_Search_Portable(0, 1176,422,2,0x01B731)
+				$FB = Pixel_Search_Portable(0, 1204,420,2,0x02B32A)
+				If IsArray($FA) And IsArray($FB) Then
+				Else
+				$applied = 1
+				EndIf
 			Else
 				$applied = 1
 			EndIf
@@ -2020,23 +2050,36 @@ Func Alliance_Donation()
 			If IsArray($FA) And IsArray($FB) Then
 				Mouse_Click_Portable(0, 1182, 610)
 				Sleep(1000)
+				;check for application status
+				$FA = Pixel_Search_Portable(0, 1175,599,2,0x00BB2F)
+				$FB = Pixel_Search_Portable(0, 1210,604,2,0x01AF2C)
+				If IsArray($FA) And IsArray($FB) Then
+				Else
+				$applied = 1
+				EndIf
 			Else
 				$applied = 1
 			EndIf
 			BACK_TO_MAIN_SCREEN()
 			Sleep(10000)
 			$timeout = $timeout - 1
-			If $timeout == 0 Then
+			If $timeout == 0 Or $applied == 0 Then
 				$failed = 1
 				Error_Log("Application failed:" & $player & ":" & $server & ":" & $applied)
 			EndIf
 		Else
+			$applied = 1
 			Alliance_Donation_Mission()
 
 			$donated = Alliance_Quit()
 		EndIf
 	WEnd
 	; check status
+	If $applied == 0 or $donated == 0 Then
+	If $status <> 1 Then
+		PLAYER_INFO_LOOPBACK()
+	EndIf
+	EndIf
 EndFunc
 
 
@@ -2565,13 +2608,22 @@ Func Mystic_Legend_General()
 	;click legends page
 	Mouse_Click_Portable(0, 950, 390)
 	Sleep(1000)
+	Local $found = 10
+	While $found <> 0
 	;click luxun
 	Mouse_Click_Portable(0, 762, 919)
 	Sleep(1500)
-
 	$FA = Pixel_Search_Portable(0, 1175,763,2,0xDE240F)
 	$FB = Pixel_Search_Portable(0, 1161,741,2,0xF3300B)
 	If IsArray($FA) And IsArray($FB) Then
+		$found = 0
+	Else
+		$found = $found - 1
+		Mouse_Drag_Portable(1, 750, 911, 1150, 911)
+		Sleep(1000)
+	EndIf
+	WEnd
+
 	;click mystic
 	Mouse_Click_Portable(0, 1161, 768)
 	Sleep(2000)
@@ -2584,7 +2636,7 @@ Func Mystic_Legend_General()
 
 	Battle_Start()
 	Mystic_Battle_End()
-	EndIf
+
 	BACK_TO_MAIN_SCREEN()
 EndFunc
 
