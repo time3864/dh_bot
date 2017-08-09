@@ -2,14 +2,16 @@
 
 Error_Log("----------------------------------------------------------------------")
 
+Default_Setting()
+
+$shutdown = 0
 $logging = 0
 $allow_no_login = 1
-;$players_file = "players_donate.txt"
-$players_file = "players_leader.txt"
+$master_mission = 17
+$retries = 2
+$players_file = "players_bless.txt"
 
-$master_mission = 950
-$fast_bot = 1
-$retries = 1000
 Main_Controller()
+
 
 Exit

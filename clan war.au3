@@ -1,5 +1,5 @@
 #include "bluestack.au3"
 
-Reset_DH_Scale()
+PC_SET_SCALE()
 
 Clan_War_Attack()

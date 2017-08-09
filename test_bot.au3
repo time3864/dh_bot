@@ -13,7 +13,7 @@ ToolTip('This box shows bot still running.',500,500)
 Open_DH()
 MsgBox($MB_SYSTEMMODAL, "Check 01:", "Do you able to see DH main screen now?")
 
-PLAYER_INFO(1)
+PLAYER_INFO(1,7)
 LOGIN()
 MsgBox($MB_SYSTEMMODAL, "Check 02:", "Your account successfully login?")
 
